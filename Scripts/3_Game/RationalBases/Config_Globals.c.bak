@@ -1,0 +1,80 @@
+ class Config_settings
+{
+   
+      int search_radius;
+      int max_containers;
+      int max_locks; 
+	  int enable_locktracking;
+	  int enable_containertracking;
+}
+
+class Config_Globals
+{
+	private static ref Config_settings z_Globals = NULL;
+	private static const string configPath = "$profile:\\RationalBases\\Config_settings.json";
+	private static const string configRoot = "$profile:\\RationalBases\\";	
+	
+	
+	
+	static Config_settings Get()
+	{
+		
+		if (z_Globals == NULL)
+		{
+			Set();
+		} 
+		
+ 		return z_Globals;
+	}
+
+	static void Set()
+	{
+		z_Globals = LoadConfig();
+	}
+
+	private static Config_settings LoadConfig()
+	{
+		Print("==================================================");
+		Config_settings config = new Config_settings;
+
+		if (FileExist(configPath)==0)
+        {
+            Print("[RationalBases] 'Config does not exist' does not exist");
+            CreateDefaultConfig(config);
+        }
+		else {
+
+			JsonFileLoader<Config_settings>.JsonLoadFile(configPath, config);
+			Print("[RationalBases] 'Config' found, loaded config");
+		}
+		
+		int ml = config.max_locks;
+		int sr =  config.search_radius;
+		int mc = config.max_containers;	
+		
+		GetGame().ChatPlayer(string.Format("->Max Locks [%1], Search Radius [%2], Max Containers [%3]", ml, sr, mc));
+
+		return config;
+	}
+
+	private static void CreateDefaultConfig(Config_settings config)
+	{
+		config.max_locks = 2;
+		config.search_radius = 60;
+		config.max_containers = 2;
+		config.enable_locktracking = 1;
+		config.enable_containertracking = 1;
+
+		
+		
+        if (FileExist(configRoot)==0)
+        {
+            Print("[RationalBases] '" + configRoot + "' does not exist, creating directory");
+            MakeDirectory(configRoot);
+        }
+		
+		Print("[RationalBases] Saving default config file!");			
+        JsonFileLoader<Config_settings>.JsonSaveFile(configPath, config);
+		
+	}
+}

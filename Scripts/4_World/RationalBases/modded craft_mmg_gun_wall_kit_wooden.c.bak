@@ -1,0 +1,12 @@
+modded class CraftWoodenCrate 
+{	
+	
+  override bool CanDo(ItemBase ingredients[], PlayerBase player)
+  {
+		Print("CraftWoodenCrate.CanDo()");
+		return ScanUtils.CanPlaceContainer(Config_Globals.Get().max_containers,Config_Globals.Get().search_radius);
+		
+
+  }
+	
+}

@@ -1,0 +1,148 @@
+modded class PlayerBase	
+{
+	
+	
+	override void OnJumpStart()    
+    {
+        super.OnJumpStart();         
+		int ml = Config_Globals.Get().max_locks;
+		int sr =  Config_Globals.Get().search_radius;
+        bool result = CanPlaceCodeLock(ml, (float)sr);
+    }
+	
+	
+	void SceneGetEntitiesInSphere(vector pos, float radius, out array<EntityAI> entList)
+	{
+	
+		vector upperleft;
+		vector lowerright;
+		
+		CalculateBoundingBox(pos, radius, lowerright, upperleft);
+		DayZPlayerUtils.SceneGetEntitiesInBox(upperleft, lowerright, entList);
+	
+	}
+	
+	void PhysicsGetEntitiesInSphere(vector pos, float radius, out array<EntityAI> entList)
+	{
+	
+		vector upperleft;
+		vector lowerright;
+		
+		CalculateBoundingBox(pos, radius, lowerright, upperleft);
+		DayZPlayerUtils.PhysicsGetEntitiesInBox(upperleft, lowerright, entList);
+	
+	}
+	void CalculateBoundingBox(	vector 	pos, float radius, out vector upperleft, out vector lowerright)	
+	{	
+		vector vDisplacement = Vector(radius, radius, radius);
+	
+	
+		upperleft = pos + vDisplacement;
+		lowerright = pos - vDisplacement;
+		
+		Print(string.Format("Box = [%1][%2]", upperleft.ToString(), lowerright.ToString()));
+		
+		
+	
+	}
+	
+	int GetNearestFlagPole(vector pos, float radius, out vector flagPos)
+	{
+		
+		int envFlags = 0;
+		
+		array<EntityAI> entities = new array<EntityAI>;
+		
+		SceneGetEntitiesInSphere(pos, radius, entities);
+		
+        for (int i = 0; i < entities.Count(); i++)
+        {		
+	
+				if(entities.Get(i).GetDisplayName().Contains("Flag Pole"))
+				{
+					envFlags++;
+					flagPos = entities.Get(i).GetPosition();
+					Print(string.Format("Flag Pole Position = [%1]", flagPos.ToString()));
+			 
+				}
+				
+			
+         }
+		
+		return envFlags;
+	
+	
+	}
+	
+	bool CanPlaceCodeLock(int maxLocks, float radius)
+	{
+		
+		bool placeResult = true;
+		
+		
+		int curLocks = CountCodeLocks(radius);
+		if(curLocks < maxLocks)
+		{
+			GetGame().ChatPlayer(string.Format("You have used [%1] of [%2] code locks.", curLocks, maxLocks));
+			return true;
+		}
+		else{
+		
+			GetGame().ChatPlayer(string.Format("You have exceeded your limit of [%1] codelocks for this base.", maxLocks)); 
+			return false;
+			
+		}
+		
+		
+	
+	
+	
+	
+	}
+	
+	int CountCodeLocks(float protectedRadius)
+	{
+        array<EntityAI> entities = new array<EntityAI>;
+		array<EntityAI> phyEntities = new array<EntityAI>;
+		vector upperleft;
+		vector lowerright;
+		vector flagPos;
+		
+        int envLocks = 0;
+		int attLocks = 0;
+		
+		int envFlags = GetNearestFlagPole(GetGame().GetPlayer().GetPosition(), protectedRadius, flagPos);
+		
+		if (envFlags == 0)
+		{
+			Print(string.Format("No flag pole within protected range! Using player position instead."));
+			SceneGetEntitiesInSphere(GetGame().GetPlayer().GetPosition(), protectedRadius, entities);
+		}
+		else
+		{
+			SceneGetEntitiesInSphere(flagPos, protectedRadius, entities);
+		}
+				
+		
+
+        for (int i = 0; i < entities.Count(); i++)
+            {
+				
+				
+				if(entities.Get(i).GetAttachmentByConfigTypeName("CodeLock") != null)
+				{
+					attLocks++;
+			 
+				}
+		
+			
+            }
+		
+		
+		Print(string.Format("Attached CodeLocks Found within range of flag pole:[%1]",attLocks)); 
+		
+		return attLocks;
+                
+	}
+	
+}

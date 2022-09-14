@@ -1,0 +1,31 @@
+modded class TentBase
+{
+	/* 
+	override bool CanReceiveAttachment( EntityAI attachment, int slotId )
+	{
+	
+		PlayerBase pBase = PlayerBase.Cast(GetGame().GetPlayer());
+		bool result = pBase.CanPlaceCodeLock(1);
+		
+		if(result) 
+  			return super.CanReceiveAttachment(attachment, slotId);
+		else
+			return result;
+
+	
+	}
+	*/
+	
+	override bool CanDisplayAttachmentCategory(string category_name) {
+		
+		PlayerBase pBase = PlayerBase.Cast(GetGame().GetPlayer());
+		bool result = pBase.CanPlaceCodeLock(1);
+		if(result) 
+  			return super.CanDisplayAttachmentCategory(category_name);
+		else
+			return result;
+		
+        
+        
+    }
+}
